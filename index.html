@@ -587,7 +587,7 @@ select:-webkit-autofill {
 
   geocoder.on('result', event => {
     const place = event.result;
-    document.getElementById('address').value = place.place_name;
+    document.getElementById('address').value = place.text + (place.address ? ' ' + place.address : '');
     const context = place.context || [];
     const city = context.find(c => c.id.startsWith('place'));
     const region = context.find(c => c.id.startsWith('region'));
