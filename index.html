@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ADU Project Estimator</title>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MAPBOX STYLES FOR ADDRESS LOOKUP -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet" />
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
+<style>
+  #address-container .mapboxgl-ctrl-geocoder--input {
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+    font-family: var(--font);
+    color: var(--primary-color);
+  }
+</style>
+
     <style>
         :root {
     --primary-color: #114e80;       /* 🔵 All main text */
@@ -282,7 +297,10 @@ select:-webkit-autofill {
         <form id="adu-form">
             <div class="form-group full-width">
                 <label for="address">Street Address</label>
-                <input type="text" id="address" name="address" placeholder="123 Main St" required>
+<div id="address-container"></div>
+<input type="hidden" id="address" name="address" required />
+<input type="hidden" id="city" name="city" />
+<input type="hidden" id="state" name="state" />
             </div>
             <div class="form-grid">
                 <div class="form-group">
@@ -510,7 +528,41 @@ select:-webkit-autofill {
     </div>
 </div>
 <!-- SCRIPT LOGIC -->
+    <!-- MAPBOX ADDRESS AUTOCOMPLETE -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
 <script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoidWFkdSIsImEiOiJjbWRveG44YTcwNnN3MmxuN25kdTVleTFpIn0.hP0aOMGxamVOg-ecgookaw';
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    types: 'address',
+    countries: 'us',
+    placeholder: 'Start typing address...',
+    mapboxgl: mapboxgl
+  });
+
+  geocoder.addTo('#address-container');
+
+  geocoder.on('result', event => {
+    const place = event.result;
+    document.getElementById('address').value = place.place_name;
+    const context = place.context || [];
+    const city = context.find(c => c.id.startsWith('place'));
+    const region = context.find(c => c.id.startsWith('region'));
+    if (city) document.getElementById('city').value = city.text;
+    if (region) document.getElementById('state').value = region.text.toUpperCase();
+  });
+
+  geocoder.on('clear', () => {
+    document.getElementById('address').value = '';
+    document.getElementById('city').value = '';
+    document.getElementById('state').value = '';
+  });
+</script>
+
+<script>
+    
     // Progress bar logic for 6 steps
     const progressData = [
         { percent: 17, id: 1 },
