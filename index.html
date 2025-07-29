@@ -12,9 +12,18 @@
 <style>
     /* Fix icon vertical alignment in geocoder input */
 .mapboxgl-ctrl-geocoder--icon {
-  top: 4px !important;
+  top: 50% !important;
   left: 14px !important;
+  transform: translateY(-50%) !important;
+  width: 20px !important;
+  height: 20px !important;
 }
+
+.mapboxgl-ctrl-geocoder--icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
 
     /* Unify spacing for the Mapbox geocoder input */
 .mapboxgl-ctrl-geocoder {
