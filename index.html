@@ -615,15 +615,10 @@ select:-webkit-autofill {
 </script>
 
 <script>
-    
     // Progress bar logic for 6 steps
     const progressData = [
-        { percent: 17, id: 1 },
-        { percent: 33, id: 2 },
-        { percent: 50, id: 3 },
-        { percent: 67, id: 4 },
-        { percent: 83, id: 5 },
-        { percent: 100, id: 6 }
+        { percent: 17, id: 1 }, { percent: 33, id: 2 }, { percent: 50, id: 3 },
+        { percent: 67, id: 4 }, { percent: 83, id: 5 }, { percent: 100, id: 6 }
     ];
     function updateProgress(step) {
         for (let i = 1; i <= 6; i++) {
@@ -634,12 +629,12 @@ select:-webkit-autofill {
     // Navigation logic
     let currentStep = 1;
     function showStep(step) {
-        document.querySelectorAll('.adu-step-container').forEach((el, idx) => {
+        document.querySelectorAll('.adu-step-container').forEach((el) => {
             el.classList.remove('active');
         });
-        document.getElementById('step'+step).classList.add('active');
+        document.getElementById('step' + step).classList.add('active');
         currentStep = step;
-        window.scrollTo({top:0,behavior:'smooth'});
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         updateProgress(step);
         if (step === 6) fillEstimate();
     }
@@ -684,7 +679,7 @@ select:-webkit-autofill {
     const continueBtn3 = document.querySelector('#step3 .btn-continue');
     const sectionBed = document.getElementById('section-bed');
     const sectionBath = document.getElementById('section-bath');
-    if(form3){
+    if (form3) {
         form3.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {
                 const fieldName = e.target.name;
@@ -693,17 +688,13 @@ select:-webkit-autofill {
                 checkFormCompletion3();
             }
         });
-        document.addEventListener('DOMContentLoaded', () => {
-            sectionBed.classList.add('is-inactive');
-            sectionBath.classList.add('is-inactive');
-            checkFormCompletion3();
-        });
         function checkFormCompletion3() {
             const sqftSelected = form3.querySelector('input[name="square_footage"]:checked');
             const bedSelected = form3.querySelector('input[name="bedrooms"]:checked');
             const bathSelected = form3.querySelector('input[name="bathrooms"]:checked');
             continueBtn3.disabled = !(sqftSelected && bedSelected && bathSelected);
         }
+        checkFormCompletion3(); // Initial check on load
     }
     function goNext3() {
         if (continueBtn3.disabled) { alert('Please make a selection in each category.'); return; }
@@ -732,23 +723,34 @@ select:-webkit-autofill {
         sessionStorage.setItem('aduTimeline', JSON.stringify(selectedValue4));
         showStep(5);
     }
-    // Step 5 Contact Submit
+    
+    // 👇 FIX: Updated Step 5 Contact Submission Logic
     const contactForm = document.getElementById('contact-form');
     const submitButton = document.getElementById('submit-button');
     const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbzrXGKEk0GhexxJB8SvqONNFyAAwfJc4AddKrNaNc1LLtZguIkZacI-rU7L0rNaXNBD/exec';
-    if(contactForm){
+    
+    if (contactForm) {
         contactForm.addEventListener('submit', function (e) {
             e.preventDefault();
             submitButton.disabled = true;
             submitButton.textContent = 'Submitting...';
+
+            // 1. Gather ALL data from sessionStorage
+            const step1Data = JSON.parse(sessionStorage.getItem('aduProjectData_step1')) || {};
             const aduType = JSON.parse(sessionStorage.getItem('adu_type')) || 'N/A';
             const aduDetails = JSON.parse(sessionStorage.getItem('aduDetails')) || {};
             const aduTimeline = JSON.parse(sessionStorage.getItem('aduTimeline')) || 'N/A';
+
+            // 2. Build the complete payload, including address info
             const payload = {
+                timestamp: new Date().toLocaleString(),
                 firstName: document.getElementById("firstName").value,
                 lastName: document.getElementById("lastName").value,
                 email: document.getElementById("email").value,
                 phone: document.getElementById("phone").value,
+                address: step1Data.address || 'N/A',
+                city: step1Data.city || 'N/A',
+                state: step1Data.state || 'N/A',
                 notes: document.getElementById("notes").value,
                 aduType: aduType,
                 squareFootage: aduDetails.squareFootage || 'N/A',
@@ -756,52 +758,43 @@ select:-webkit-autofill {
                 bathrooms: aduDetails.bathrooms || 'N/A',
                 timeline: aduTimeline
             };
-            // Optionally post to Google Script in background
-            const iframe = document.createElement('iframe');
-            iframe.name = 'submit-iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-            const tempForm = document.createElement('form');
-            tempForm.method = 'post';
-            tempForm.action = googleScriptUrl;
-            tempForm.target = iframe.name;
-            const dataInput = document.createElement('input');
-            dataInput.type = 'hidden';
-            dataInput.name = 'data';
-            dataInput.value = JSON.stringify(payload);
-            tempForm.appendChild(dataInput);
-            document.body.appendChild(tempForm);
-            tempForm.submit();
-            setTimeout(() => { showStep(6); }, 1500);
+
+            // 3. Send data using the Fetch API
+            const formData = new FormData();
+            formData.append('data', JSON.stringify(payload));
+
+            fetch(googleScriptUrl, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json()) // Assumes your script returns JSON
+            .then(data => {
+                console.log('Success:', data);
+                showStep(6); // Go to the next step on success
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your estimate. Please try again.');
+                // Re-enable the button if the submission fails
+                submitButton.disabled = false;
+                submitButton.textContent = 'Get My Estimate ✓';
+            });
         });
     }
+
     // Step 6 estimate calculation
-    // Step 6 estimate calculation (overridden to $7,500 / 5×$1,500)
-function fillEstimate() {
-    // fixed cost is always 7,500
-    const fixedCost = 7500;
-    // break into 5 equal payments
-    const payment = Math.round(fixedCost / 5); // 1500
-
-    // Update the DOM
-    document.getElementById("fixedCost").textContent =
-      `$${fixedCost.toLocaleString()}`;
-    document.getElementById("monthlyPayment").textContent =
-      payment.toLocaleString();
-
-    // Leave your construction cost logic intact:
-    const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
-    let gcRange = [0, 0];
-    if (aduType === "Garage Conversion") {
-        gcRange = [113, 188];
-    } else if (aduType === "Attached ADU") {
-        gcRange = [150, 225];
-    } else {
-        gcRange = [188, 263];
+    function fillEstimate() {
+        const fixedCost = 7500;
+        const payment = Math.round(fixedCost / 5);
+        document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
+        document.getElementById("monthlyPayment").textContent = payment.toLocaleString();
+        const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
+        let gcRange = [188, 263]; // Default
+        if (aduType === "Garage Conversion") gcRange = [113, 188];
+        if (aduType === "Attached ADU") gcRange = [150, 225];
+        document.getElementById("gcLow").textContent = gcRange[0];
+        document.getElementById("gcHigh").textContent = gcRange[1];
     }
-    document.getElementById("gcLow").textContent = gcRange[0];
-    document.getElementById("gcHigh").textContent = gcRange[1];
-}
 
     document.addEventListener('DOMContentLoaded', function() {
         showStep(1);
