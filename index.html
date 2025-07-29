@@ -26,6 +26,24 @@
     --success-light: #ECFDF5;
     --body-bg: #f9fafb;
 }
+        /* 💙 Force input & select text color to match blue theme */
+input, select, textarea {
+  color: var(--primary-color); /* makes manual entry blue */
+}
+
+/* 💡 Autofill override for Chrome & Safari */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--primary-color) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Optional: change placeholder color too */
+::placeholder {
+  color: #9db2c4; /* muted blue-gray */
+}
+
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
