@@ -585,30 +585,17 @@ select:-webkit-autofill {
 
   geocoder.addTo('#address-container');
 
- geocoder.on('result', event => {
-  const place = event.result;
-  const context = place.context || [];
-
-  // Extract clean street address only
-  const streetNumber = place.address || '';
-  const streetName = place.text || '';
-  const cleanStreet = `${streetNumber} ${streetName}`.trim();
-
-  // Fill input fields
-  document.getElementById('address').value = cleanStreet;
-
-  const city = context.find(c => c.id.includes('place'));
-  const region = context.find(c => c.id.includes('region'));
-
-  if (city) {
-    document.getElementById('city').value = city.text;
-  }
-  if (region) {
-    const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
-    document.getElementById('state').value = stateCode || '';
-  }
-});
-
+  geocoder.on('result', event => {
+    const place = event.result;
+    document.getElementById('address').value = place.text + (place.address ? ' ' + place.address : '');
+    const context = place.context || [];
+    const city = context.find(c => c.id.startsWith('place'));
+    const region = context.find(c => c.id.startsWith('region'));
+    if (city) document.getElementById('city').value = city.text;
+    if (region) {
+  const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
+  document.getElementById('state').value = stateCode || '';
+}
 
   });
 
