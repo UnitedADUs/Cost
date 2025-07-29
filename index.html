@@ -580,6 +580,10 @@ select:-webkit-autofill {
     types: 'address',
     countries: 'us',
     placeholder: 'Start typing address...',
+    // 👇 FIX: This function tells the geocoder to only display the street address
+    getItemValue: (item) => {
+      return item.address ? `${item.address} ${item.text}` : item.text;
+    },
     mapboxgl: mapboxgl
   });
 
@@ -587,16 +591,20 @@ select:-webkit-autofill {
 
   geocoder.on('result', event => {
     const place = event.result;
-    document.getElementById('address').value = place.text + (place.address ? ' ' + place.address : '');
+    
+    // 👇 FIX: This updates the hidden input with the clean street address
+    document.getElementById('address').value = place.address ? `${place.address} ${place.text}` : place.text;
+    
+    // The rest of your code for city and state is correct
     const context = place.context || [];
     const city = context.find(c => c.id.startsWith('place'));
     const region = context.find(c => c.id.startsWith('region'));
+    
     if (city) document.getElementById('city').value = city.text;
     if (region) {
-  const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
-  document.getElementById('state').value = stateCode || '';
-}
-
+      const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
+      document.getElementById('state').value = stateCode || '';
+    }
   });
 
   geocoder.on('clear', () => {
