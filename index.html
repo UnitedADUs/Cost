@@ -6,9 +6,35 @@
     <title>ADU Project Estimator</title>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <!-- MAPBOX STYLES FOR ADDRESS LOOKUP -->
+    
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet" />
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
 <style>
+    /* Unify spacing for the Mapbox geocoder input */
+.mapboxgl-ctrl-geocoder {
+  width: 100% !important;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.mapboxgl-ctrl-geocoder--input {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 0.9rem 1.1rem !important;
+  font-size: 1rem;
+  font-family: var(--font);
+  color: var(--primary-color);
+  box-shadow: none !important;
+}
+
+/* Remove background shadow bubble */
+.mapboxgl-ctrl-geocoder--icon,
+.mapboxgl-ctrl-geocoder--icon-search {
+  top: 14px !important;
+  left: 12px !important;
+}
+
   #address-container .mapboxgl-ctrl-geocoder--input {
     width: 100%;
     padding: 0.9rem 1.1rem;
