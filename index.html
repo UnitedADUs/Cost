@@ -10,6 +10,12 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet" />
 <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet" />
 <style>
+    /* Fix icon vertical alignment in geocoder input */
+.mapboxgl-ctrl-geocoder--icon {
+  top: 14px !important;
+  left: 14px !important;
+}
+
     /* Unify spacing for the Mapbox geocoder input */
 .mapboxgl-ctrl-geocoder {
   width: 100% !important;
@@ -577,7 +583,11 @@ select:-webkit-autofill {
     const city = context.find(c => c.id.startsWith('place'));
     const region = context.find(c => c.id.startsWith('region'));
     if (city) document.getElementById('city').value = city.text;
-    if (region) document.getElementById('state').value = region.text.toUpperCase();
+    if (region) {
+  const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
+  document.getElementById('state').value = stateCode || '';
+}
+
   });
 
   geocoder.on('clear', () => {
