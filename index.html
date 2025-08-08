@@ -1076,39 +1076,43 @@
         }
         
         // Step 7 estimate calculation
-       function fillEstimate() {
-        const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
-        const fixedCost = (aduType === "Detached ADU") ? 10000 : 7500;
-        document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
-        document.getElementById("monthlyPayment").textContent = Math.round(fixedCost / 5).toLocaleString();
-            const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
-            const aduSquareFootage = JSON.parse(sessionStorage.getItem('aduSquareFootage'));
-            let aduBedBath = {};
-            try { aduBedBath = JSON.parse(sessionStorage.getItem('aduBedBath')); } catch(e){}
-            let size = 550; // default small
-            let gcRange = [245, 315]; // default range
-            if (aduSquareFootage === "Small") size = 550;
-            if (aduSquareFootage === "Medium") size = 775;
-            if (aduSquareFootage === "Large") size = 900;
-            if (aduType === "Garage Conversion") gcRange = [190, 260];
-            if (aduType === "Basement Conversion") gcRange = [215, 285];
-            const gcMid = Math.round((gcRange[0] + gcRange[1]) / 2);
-            const constructionPrice = size * gcMid;
-            document.getElementById("gcLow").textContent = gcRange[0];
-            document.getElementById("gcHigh").textContent = gcRange[1];
-            document.getElementById("constructionTotal").textContent = `$${constructionPrice.toLocaleString()}`;
-            const loanAmount = constructionPrice;
-            const bostonLoanAmount = Math.max(loanAmount - 57500, 0);
-            const annualRate = 0.08;
-            const monthlyRate = annualRate / 12;
-            const months = 30 * 12;
-            function mortgage(P, r, n) {
-                return P * r / (1 - Math.pow(1 + r, -n));
-            }
-            const monthlyPayment = mortgage(loanAmount, monthlyRate, months);
-            const bostonMonthlyPayment = mortgage(bostonLoanAmount, monthlyRate, months);
-            document.getElementById("monthlyLoanPayment").textContent = `$${monthlyPayment.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
-            document.getElementById("monthlyLoanPaymentBoston").textContent = `$${bostonMonthlyPayment.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+               function fillEstimate() {
+          const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
+          const fixedCost = (aduType === "Detached ADU") ? 10000 : 7500;
+          document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
+          document.getElementById("monthlyPayment").textContent = Math.round(fixedCost / 5).toLocaleString();
+        
+          const aduSquareFootage = JSON.parse(sessionStorage.getItem('aduSquareFootage'));
+          let aduBedBath = {};
+          try { aduBedBath = JSON.parse(sessionStorage.getItem('aduBedBath')); } catch(e){}
+          let size = 550; // default small
+          let gcRange = [245, 315]; // default range
+          if (aduSquareFootage === "Small") size = 550;
+          if (aduSquareFootage === "Medium") size = 775;
+          if (aduSquareFootage === "Large") size = 900;
+          if (aduType === "Garage Conversion") gcRange = [190, 260];
+          if (aduType === "Basement Conversion") gcRange = [215, 285];
+        
+          const gcMid = Math.round((gcRange[0] + gcRange[1]) / 2);
+          const constructionPrice = size * gcMid;
+        
+          document.getElementById("gcLow").textContent = gcRange[0];
+          document.getElementById("gcHigh").textContent = gcRange[1];
+          document.getElementById("constructionTotal").textContent = `$${constructionPrice.toLocaleString()}`;
+        
+          const loanAmount = constructionPrice;
+          const bostonLoanAmount = Math.max(loanAmount - 57500, 0);
+          const annualRate = 0.08;
+          const monthlyRate = annualRate / 12;
+          const months = 30 * 12;
+        
+          function mortgage(P, r, n) {
+            return P * r / (1 - Math.pow(1 + r, -n));
+          }
+        
+          const monthlyPayment = mortgage(loanAmount, monthlyRate, months);
+          const bostonMon
+
         }
         
         document.addEventListener('DOMContentLoaded', function() {
