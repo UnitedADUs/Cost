@@ -85,8 +85,8 @@
         }
 
         /* Container styles */
-        .adu-step-container.active {
-            display: flex;
+        .adu-step-container { display: none; }
+        .adu-step-container.active { display: flex; }
         }
         .adu-main-card {
             width: 100%;
@@ -1078,7 +1078,7 @@
         // Step 7 estimate calculation
                       function fillEstimate() {
           const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
-          const fixedCost = (aduType === "Detached ADU") ? 10000 : 7500;
+          const fixedCost = (aduType === "Basement Conversion") ? 10000 : 7500;
           document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
           document.getElementById("monthlyPayment").textContent = Math.round(fixedCost / 5).toLocaleString();
         
