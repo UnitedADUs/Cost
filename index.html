@@ -1076,10 +1076,11 @@
         }
         
         // Step 7 estimate calculation
-        function fillEstimate() {
-            const fixedCost = 7500;
-            document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
-            document.getElementById("monthlyPayment").textContent = Math.round(fixedCost / 5).toLocaleString();
+       function fillEstimate() {
+        const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
+        const fixedCost = (aduType === "Detached ADU") ? 10000 : 7500;
+        document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
+        document.getElementById("monthlyPayment").textContent = Math.round(fixedCost / 5).toLocaleString();
             const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
             const aduSquareFootage = JSON.parse(sessionStorage.getItem('aduSquareFootage'));
             let aduBedBath = {};
