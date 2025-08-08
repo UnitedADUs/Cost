@@ -1085,12 +1085,12 @@
             let aduBedBath = {};
             try { aduBedBath = JSON.parse(sessionStorage.getItem('aduBedBath')); } catch(e){}
             let size = 550; // default small
-            let gcRange = [188, 263]; // default range
+            let gcRange = [245, 315]; // default range
             if (aduSquareFootage === "Small") size = 550;
             if (aduSquareFootage === "Medium") size = 775;
             if (aduSquareFootage === "Large") size = 900;
-            if (aduType === "Garage Conversion") gcRange = [113, 188];
-            if (aduType === "Attached ADU") gcRange = [150, 225];
+            if (aduType === "Garage Conversion") gcRange = [190, 260];
+            if (aduType === "Basement Conversion") gcRange = [215, 285];
             const gcMid = Math.round((gcRange[0] + gcRange[1]) / 2);
             const constructionPrice = size * gcMid;
             document.getElementById("gcLow").textContent = gcRange[0];
