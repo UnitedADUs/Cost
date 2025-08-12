@@ -489,6 +489,35 @@
             }
             /* --- END MOBILE STACKING FIX --- */
         }
+        /* ---- Mobile fix for Step 7 painting/overlap on iOS Safari ---- */
+html, body { -webkit-text-size-adjust: 100%; } /* prevents odd zoom/rehydration */
+@media (max-width: 768px) {
+  /* Make the results card behave like a normal block and not a fixed-height scroller */
+  #step7 .adu-main-card {
+    max-height: none !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+
+  /* Stack the two cards vertically at full width */
+  #step7 .estimate-section {
+    display: block !important;
+  }
+  #step7 .card {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 0 1rem 0 !important;
+    position: static !important;
+    float: none !important;
+    clear: both !important;
+  }
+}
+
     </style>
 </head>
 
