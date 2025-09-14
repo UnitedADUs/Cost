@@ -265,13 +265,11 @@
           }
         }
 
-        /* NEW: Site logo styles */
+        /* UPDATED: Site logo styles (now stationary in the flow, not fixed) */
         .site-logo {
-          position: fixed;
-          top: 20px;
-          left: 30px;
-          z-index: 1000;
+          position: static;          /* was: fixed */
           display: inline-block;
+          margin: 20px 0 0 30px;     /* similar visual offset to your old top/left */
         }
         .site-logo img {
           height: 45px;
@@ -293,7 +291,7 @@
         </symbol>
     </svg>
 
-    <!-- NEW: Logo link -->
+    <!-- Logo link (now scrolls away naturally) -->
     <a href="https://uadus.com" class="site-logo" target="_blank" rel="noopener noreferrer">
       <img
         src="https://static.wixstatic.com/media/325250_803d1fd7142d4a65b5d66a4eace482b7~mv2.png/v1/crop/x_0,y_296,w_1024,h_386/fill/w_424,h_160,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_auto/United%20ADUs%20Logo%20Trans.png"
