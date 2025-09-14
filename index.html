@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
   <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet">
+
   <style>
     :root {
       --primary-color: #114e80;
@@ -30,27 +31,27 @@
       padding: 0;
     }
 
-    /* ✅ Horizontally centered, top aligned */
+    /* ✅ Top aligned + horizontally centered wrapper */
     .adu-wrapper {
       display: flex;
-      justify-content: center;     /* center horizontally */
-      align-items: flex-start;      /* top of page */
-      padding: 4rem 2rem;            /* space from top */
+      justify-content: center;
+      align-items: flex-start;
+      padding: 4rem 2rem;
     }
 
     .adu-step-container {
       display: block;
       width: 100%;
-      max-width: 950px;               /* keeps width consistent */
+      max-width: 950px; /* consistent width */
     }
 
     .adu-main-card {
-      margin: 0 auto;
       width: 100%;
       background: var(--card-color);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 2rem;
+      margin: 0 auto;
     }
 
     /* Progress bar */
@@ -88,21 +89,34 @@
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { margin-bottom: 1rem; }
     label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #114e80; }
-    input, select {
+    input, select, textarea {
       width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color);
       font-family: var(--font); font-size: 0.95rem;
     }
 
+    /* Choices */
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .choice-option {
+      position: relative; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;
+      text-align: center; cursor: pointer; background: #fff;
+    }
+    .choice-option.selected { border: 2px solid var(--accent-color); background: #fff5f5; }
+    .checkmark-icon {
+      position: absolute; top: 8px; right: 8px; background: var(--accent-color);
+      border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; opacity: 0;
+    }
+    .choice-option.selected .checkmark-icon { opacity: 1; }
+
     /* Buttons */
-    .button-container { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
+    .button-container { display: flex; justify-content: space-between; margin-top: 2rem; }
     .btn {
       font-weight: 600; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem;
       padding: 0.65rem 1.5rem; transition: all 0.2s ease;
     }
     .btn-continue { background-color: var(--accent-color); color: #fff; }
-    .btn-continue:hover { background-color: var(--accent-color-dark); }
+    .btn-back { background: transparent; border: 1px solid var(--border-color); color: #114e80; }
 
-    /* Step 7 specific */
+    /* Step 7 cards */
     .estimate-section { display: flex; gap: 2rem; margin-top: 2rem; }
     .card {
       flex: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; background: #fff;
@@ -125,8 +139,10 @@
   </style>
 </head>
 <body>
+
   <div class="adu-wrapper">
-    <!-- Step 1 -->
+
+    <!-- Step 1: Location -->
     <div class="adu-step-container active" id="step1">
       <div class="adu-main-card">
         <div class="progress-bar-wrap">
@@ -156,20 +172,104 @@
             </div>
           </div>
           <div class="button-container">
-            <button type="button" class="btn btn-continue">Continue</button>
+            <button type="button" class="btn btn-continue" onclick="showStep(2)">Continue</button>
           </div>
         </form>
       </div>
     </div>
-  </div>
 
-  <!-- Mapbox -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+    <!-- Step 2: ADU Type -->
+    <div class="adu-step-container" id="step2">
+      <div class="adu-main-card">
+        <div class="progress-bar-wrap">
+          <span class="progress-label">Step 2 of 7 <span id="progressPercent2">28%</span></span>
+          <div class="progress-bar"><div class="progress-bar-inner" id="progressBar2"></div></div>
+        </div>
+        <h1>What type of ADU are you interested in?</h1>
+        <div class="choice-grid">
+          <div class="choice-option" onclick="selectOption(this,'Detached ADU')"><div class="checkmark-icon">✓</div>Detached ADU</div>
+          <div class="choice-option" onclick="selectOption(this,'Attached ADU')"><div class="checkmark-icon">✓</div>Attached ADU</div>
+          <div class="choice-option" onclick="selectOption(this,'Garage Conversion')"><div class="checkmark-icon">✓</div>Garage Conversion</div>
+          <div class="choice-option" onclick="selectOption(this,'Basement Conversion')"><div class="checkmark-icon">✓</div>Basement Conversion</div>
+        </div>
+        <div class="button-container">
+          <button class="btn btn-back" onclick="showStep(1)">Back</button>
+          <button class="btn btn-continue" onclick="showStep(3)">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Size -->
+    <div class="adu-step-container" id="step3">
+      <div class="adu-main-card">
+        <div class="progress-bar-wrap">
+          <span class="progress-label">Step 3 of 7 <span id="progressPercent3">43%</span></span>
+          <div class="progress-bar"><div class="progress-bar-inner" id="progressBar3"></div></div>
+        </div>
+        <h1>What is the size of your ADU?</h1>
+        <div class="choice-grid">
+          <div class="choice-option" onclick="selectSize(this,'Small')"><div class="checkmark-icon">✓</div>Small (Up to 500)</div>
+          <div class="choice-option" onclick="selectSize(this,'Medium')"><div class="checkmark-icon">✓</div>Medium (500–700)</div>
+          <div class="choice-option" onclick="selectSize(this,'Large')"><div class="checkmark-icon">✓</div>Large (Over 700)</div>
+        </div>
+        <div class="button-container">
+          <button class="btn btn-back" onclick="showStep(2)">Back</button>
+          <button class="btn btn-continue" onclick="showStep(4)">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 7 (shortened for demo) -->
+    <div class="adu-step-container" id="step7">
+      <div class="adu-main-card">
+        <h1>Your Estimate is Ready!</h1>
+        <div class="estimate-section">
+          <div class="card">
+            <h3>Architectural Planning & Engineering</h3>
+            <div>Fixed Cost: <span id="fixedCost">$0</span></div>
+            <div class="payment-plan">Payment plans available</div>
+          </div>
+          <div class="card">
+            <h3>Construction Cost Estimate</h3>
+            <div>$<span id="gcLow">0</span> – $<span id="gcHigh">0</span> / sqft</div>
+            <div>Total: <span id="constructionTotal">$0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.adu-wrapper -->
+
+  <!-- JS Logic -->
   <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoidWFkdSIsImEiOiJjbWRveG44YTcwNnN3MmxuN25kdTVleTFpIn0.hP0aOMGxamVOg-ecgookaw';
-    const geocoder = new MapboxGeocoder({ accessToken: mapboxgl.accessToken, types: 'address', countries: 'us' });
-    geocoder.addTo('#address-container');
+    const SIZE_CONFIG = {
+      Small:  { calcSqft: 400 },
+      Medium: { calcSqft: 600 },
+      Large:  { calcSqft: 800 }
+    };
+    const GC_RANGE_CONFIG = {
+      "Detached ADU": [350,420],
+      "Attached ADU": [350,420],
+      "Garage Conversion": [290,330],
+      "Basement Conversion": [290,330]
+    };
+
+    function showStep(n) {
+      document.querySelectorAll('.adu-step-container').forEach(s => s.style.display='none');
+      document.getElementById('step'+n).style.display='block';
+    }
+
+    function selectOption(el,value){
+      document.querySelectorAll('#step2 .choice-option').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+      sessionStorage.setItem('adu_type',value);
+    }
+    function selectSize(el,value){
+      document.querySelectorAll('#step3 .choice-option').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+      sessionStorage.setItem('adu_size',value);
+    }
   </script>
+
 </body>
 </html>
