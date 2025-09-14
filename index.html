@@ -264,6 +264,20 @@
             margin: 0 0 1rem 0 !important; position: static !important; float: none !important; clear: both !important;
           }
         }
+
+        /* NEW: Site logo styles */
+        .site-logo {
+          position: fixed;
+          top: 20px;
+          left: 30px;
+          z-index: 1000;
+          display: inline-block;
+        }
+        .site-logo img {
+          height: 45px;
+          width: auto;
+          display: block;
+        }
     </style>
 </head>
 
@@ -278,6 +292,14 @@
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </symbol>
     </svg>
+
+    <!-- NEW: Logo link -->
+    <a href="https://uadus.com" class="site-logo" target="_blank" rel="noopener noreferrer">
+      <img
+        src="https://static.wixstatic.com/media/325250_803d1fd7142d4a65b5d66a4eace482b7~mv2.png/v1/crop/x_0,y_296,w_1024,h_386/fill/w_424,h_160,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_auto/United%20ADUs%20Logo%20Trans.png"
+        alt="United ADUs Logo"
+      >
+    </a>
 
     <div class="adu-wrapper">
       <!-- Step 1: Location -->
@@ -611,12 +633,24 @@
             <div class="cta-section">
                 <h2>Ready for a Free Consultation?</h2>
                 <p>Book a free call to discuss your project in detail with our experts.</p>
-                <a href="#" class="btn btn-consult">Book a Free Consult</a>
+                <a href="https://www.unitedadus.com/free-consultation"
+                   class="btn btn-consult"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="Book a free consultation on United ADUs">
+                   Book a Free Consult
+                </a>
             </div>
             <div class="cta-section">
                 <h2>Need a Detailed Feasibility Report?</h2>
                 <p>Get a comprehensive analysis of your property's ADU potential.</p>
-                <a href="#" class="btn btn-feasibility">Get Feasibility Report</a>
+                <a href="https://www.unitedadus.com/feasability-report"
+                   class="btn btn-feasibility"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="Get a feasibility report on United ADUs">
+                   Get Feasibility Report
+                </a>
             </div>
         </div>
       </div>
