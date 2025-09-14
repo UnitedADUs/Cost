@@ -1,898 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>ADU Project Estimator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- MAPBOX STYLES FOR ADDRESS LOOKUP -->
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
-    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #114e80;
-            --accent-color: #ea2039;
-            --accent-color-alt: #ea2039;
-            --accent-color-dark: #ba1e2e;
-            --secondary-color: #1d3557;
-            --light-gray: #f1f3f5;
-            --gray-light: #f0f2f5;
-            --gray-border: #dee2e6;
-            --border-color: #dee2e6;
-            --card-color: #ffffff;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            --radius: 18px;
-            --font: 'Lato', sans-serif;
-            --subtext-color: #114e80;
-            --step-indicator: #6c757d;
-            --success-green: #059669;
-            --success-light: #ECFDF5;
-            --body-bg: #f9fafb;
-            --max-height-uniform: 700px;
-            --main-card-width: 950px;
-            --main-card-min-width: 800px;
-            --selected-bg: #fff5f5;
-            --selected-border: var(--accent-color);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ADU Project Estimator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #114e80;
+      --accent-color: #ea2039;
+      --accent-color-dark: #ba1e2e;
+      --secondary-color: #1d3557;
+      --border-color: #dee2e6;
+      --card-color: #ffffff;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+      --font: 'Lato', sans-serif;
+      --body-bg: #f9fafb;
+    }
 
-        /* Base styles */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--body-bg);
-            font-family: var(--font);
-            color: var(--primary-color);
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
+    body {
+      background: var(--body-bg);
+      font-family: var(--font);
+      color: var(--primary-color);
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* Center the whole estimator vertically & horizontally */
-        .adu-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;      /* full screen height */
-            padding: 2rem;
-            box-sizing: border-box;
-        }
-        @media (max-width: 768px) {
-            .adu-wrapper {
-                align-items: flex-start; /* allow natural scroll on mobile */
-                padding-top: 1.5rem;
-            }
-        }
+    /* ✅ Horizontally centered, top aligned */
+    .adu-wrapper {
+      display: flex;
+      justify-content: center;     /* center horizontally */
+      align-items: flex-start;      /* top of page */
+      padding: 4rem 2rem;            /* space from top */
+    }
 
-        /* Mapbox styles normalized */
-        .mapboxgl-ctrl-geocoder { width: 100% !important; max-width: 100%; margin: 0 !important; padding: 0 !important; }
-        .mapboxgl-ctrl-geocoder--icon { top: 50% !important; left: 14px !important; transform: translateY(-45%) !important; width: 16px !important; height: 16px !important; }
-        .mapboxgl-ctrl-geocoder--icon svg { width: 16px !important; height: 16px !important; }
-        .mapboxgl-ctrl-geocoder--input {
-            border: 1px solid var(--border-color) !important;
-            border-radius: 10px !important;
-            padding: 0.6rem 0.9rem 0.6rem 2.0rem !important;
-            font-size: 0.92rem;
-            font-family: var(--font);
-            color: var(--primary-color);
-            box-shadow: none !important;
-        }
-        .mapboxgl-ctrl-geocoder--icon,
-        .mapboxgl-ctrl-geocoder--icon-search { top: 10px !important; left: 10px !important; }
+    .adu-step-container {
+      display: block;
+      width: 100%;
+      max-width: 950px;               /* keeps width consistent */
+    }
 
-        /* Container styles */
-        .adu-step-container { display: none; }
-        .adu-step-container.active { display: flex; } /* removed stray brace bug */
+    .adu-main-card {
+      margin: 0 auto;
+      width: 100%;
+      background: var(--card-color);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+    }
 
-        .adu-main-card {
-            width: 100%;
-            max-width: var(--main-card-width);
-            min-width: var(--main-card-min-width);
-            background: var(--card-color);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            margin-top: 1rem;
-            animation: fadeIn 0.5s ease-out forwards;
-            min-height: var(--max-height-uniform);
-            max-height: var(--max-height-uniform);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+    /* Progress bar */
+    .progress-bar-wrap { margin-bottom: 1.5rem; }
+    .progress-label {
+      font-size: 0.93rem;
+      font-weight: 600;
+      color: #114e80;
+      margin-bottom: 0.5rem;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: #e9ecef;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: var(--accent-color);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.4s;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to   { opacity: 1; transform: translateY(0)   scale(1); }
-        }
+    /* Headings */
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-color); }
+    .subtitle { color: #114e80; margin-bottom: 2rem; font-size: 1rem; }
 
-        /* Progress bar styles */
-        .progress-bar-wrap { margin-bottom: 1.5rem; }
-        .progress-label {
-            font-size: 0.93rem;
-            font-weight: 600;
-            color: #114e80;
-            letter-spacing: 0.3px;
-            margin-bottom: 0.5rem;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar-inner {
-            height: 100%;
-            background: var(--accent-color);
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.4s;
-            position: absolute;
-            top: 0; left: 0;
-        }
-        .progress-percent { font-size: 0.85rem; color: var(--step-indicator); margin-left: 8px; }
+    /* Forms */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #114e80; }
+    input, select {
+      width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color);
+      font-family: var(--font); font-size: 0.95rem;
+    }
 
-        /* Typography */
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-color); }
-        .subtitle { color: var(--subtext-color); margin-bottom: 2rem; font-size: 1rem; line-height: 1.4; }
-        .section-heading { font-weight: 600; font-size: 1.1rem; color: var(--primary-color); margin: 1.5rem 0 1rem; }
+    /* Buttons */
+    .button-container { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
+    .btn {
+      font-weight: 600; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem;
+      padding: 0.65rem 1.5rem; transition: all 0.2s ease;
+    }
+    .btn-continue { background-color: var(--accent-color); color: #fff; }
+    .btn-continue:hover { background-color: var(--accent-color-dark); }
 
-        /* Form elements */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-group { margin-bottom: 1rem; }
-        .full-width { grid-column: 1 / -1; }
-        label { font-weight: 500; display: block; margin-bottom: 0.5rem; color: #114e80; font-size: 0.86rem; }
-        input, select, textarea {
-            width: 100%; padding: 0.6rem 0.75rem; border-radius: 9px; border: 1px solid var(--border-color);
-            font-size: 0.92rem; font-family: var(--font); background-color: #fff; color: #114e80;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        select option { color: #114e80; }
-        input.error, select.error { border-color: var(--accent-color); }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; box-shadow: 0 0 0 2px rgba(232, 48, 56, 0.11); }
-        input::placeholder, textarea::placeholder { color: #adb5bd; }
+    /* Step 7 specific */
+    .estimate-section { display: flex; gap: 2rem; margin-top: 2rem; }
+    .card {
+      flex: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; background: #fff;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .payment-plan {
+      background: #fff5f5;
+      border: 1px solid #fee2e2;
+      padding: 0.75rem;
+      text-align: center;
+      border-radius: 6px;
+      margin-top: 1rem;
+      color: #991b1b;
+    }
 
-        /* Choice grid styles */
-        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-        .choice-option {
-            position: relative; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;
-            text-align: center; cursor: pointer; transition: all 0.2s ease; background-color: white;
-        }
-        .choice-option:hover { border-color: var(--accent-color); }
-        .choice-option.selected { background-color: var(--selected-bg); border: 2px solid var(--selected-border); }
-        .checkmark-icon {
-            position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background-color: var(--accent-color);
-            border-radius: 50%; color: white; font-size: 12px; display: flex; align-items: center; justify-content: center;
-            opacity: 0; transform: scale(0.5); transition: all 0.2s ease;
-        }
-        .choice-option.selected .checkmark-icon { opacity: 1; transform: scale(1); }
-        .house-icon { display: block; width: 40px; height: 40px; margin: 0 auto 0.75rem; fill: none; stroke: var(--primary-color); stroke-width: 2px; }
-        .choice-option.selected .house-icon { stroke: var(--accent-color); }
-        .house-small { transform: scale(0.9); }
-        .house-medium { transform: scale(1.05); }
-        .house-large { transform: scale(1.2); }
-
-        /* Button styles */
-        .button-container { display: flex; justify-content: space-between; margin-top: auto; padding-top: 2rem; }
-        .btn {
-            font-family: var(--font); font-weight: 600; font-size: 0.95rem; padding: 0.65rem 1.5rem;
-            border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: none;
-        }
-        .btn-back { background-color: transparent; color: var(--primary-color); border: 1px solid var(--border-color); }
-        .btn-back:hover { background-color: var(--gray-light); }
-        .btn-continue { background-color: var(--accent-color); color: white; }
-        .btn-continue:hover { background-color: var(--accent-color-dark); transform: translateY(-2px); }
-        .btn-continue:disabled { background-color: #FECACA; cursor: not-allowed; transform: none; }
-
-        .form-container { display: flex; flex-direction: column; flex: 1; }
-
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-        .option { border: 2px solid #ccc; border-radius: 10px; padding: 1rem; background: #fff; cursor: pointer; transition: all 0.2s; }
-        .option:hover { border-color: var(--accent-color); }
-        .option.active, .option.selected { border-color: var(--accent-color); background: var(--selected-bg); }
-        .option-title { font-weight: 600; margin-bottom: 0.25rem; font-size: 0.99rem; }
-        .option-desc, .option-subtext { color: #666; font-size: 0.85rem; }
-
-        .estimate-section {
-            display: flex; flex-direction: row; gap: 2.5rem; margin-top: 1.5rem; justify-content: center; align-items: stretch; width: 100%;
-        }
-        .card {
-            flex: 1 1 0px; background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 9px; padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.04), 0 2px 4px -2px rgb(0 0 0 / 0.04);
-            min-width: 310px; max-width: 430px; display: flex; flex-direction: column; justify-content: flex-start; min-height: 100%;
-        }
-        .card h3 { margin: 0 0 0.75rem; font-size: 0.97rem; }
-        .cost-item { margin-bottom: 0.75rem; }
-        .cost-label { font-size: 0.81rem; color: var(--secondary-color); }
-        .cost-value { font-size: 1.1rem; font-weight: 700; margin: 0.25rem 0; }
-        .payment-plan {
-            background-color: var(--selected-bg); border: 1px solid #fee2e2; color: #991b1b;
-            padding: 0.75rem; border-radius: 6px; font-size: 0.87rem; text-align: center; margin: 0.75rem 0;
-        }
-        .reimbursement-note { font-size: 0.84rem; color: var(--success-green); margin-top: 0.5rem; text-align: center; }
-        .payment-plan strong { font-size: 0.95rem; }
-        .cost-range { font-weight: 600; font-size: 0.92rem; }
-        .services-list { list-style: none; padding: 0; margin: 1rem 0 0; }
-        .services-list li { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
-
-        .cta-section { border-top: 1px solid var(--border-color); margin-top: 1.5rem; padding-top: 1rem; }
-        .cta-section h2 { font-size: 1.04rem; margin-bottom: 0.5rem; }
-        .cta-section p { color: var(--secondary-color); margin-bottom: 1rem; }
-        .btn-consult { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); text-decoration: none; display: inline-block; }
-        .btn-feasibility { background-color: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); text-decoration: none; display: inline-block; }
-
-        /* Responsive styles */
-        @media (max-width: 1200px) {
-            .adu-main-card { max-width: 95vw; min-width: unset; padding: 1.5rem; }
-            .estimate-section { flex-direction: column; gap: 1.5rem; }
-            .card { max-width: none; }
-        }
-        @media (max-width: 900px) {
-            .adu-main-card { padding: 1.25rem; max-height: none; }
-        }
-        @media (max-width: 600px) {
-            .adu-step-container { padding: 0.5rem; }
-            .form-grid, .options, .choice-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 1.25rem; }
-            .input-row { flex-direction: column; gap: 0.75rem; }
-            .button-container { padding-top: 1.5rem; }
-            /* --- MOBILE STACKING FIX --- */
-            .estimate-section, .adu-main-card {
-                display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important;
-                overflow: visible !important; position: static !important;
-            }
-            .card {
-                display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important;
-                margin: 0 0 1rem 0 !important; box-sizing: border-box !important; position: static !important; float: none !important; clear: both !important;
-            }
-            /* --- END MOBILE STACKING FIX --- */
-        }
-
-        /* ---- Mobile fix for Step 7 painting/overlap on iOS Safari ---- */
-        html, body { -webkit-text-size-adjust: 100%; }
-        @media (max-width: 768px) {
-          #step7 .adu-main-card {
-            max-height: none !important;
-            min-height: auto !important;
-            overflow: visible !important;
-            animation: none !important;
-            transform: none !important;
-            will-change: auto !important;
-          }
-          #step7 .estimate-section { display: block !important; }
-          #step7 .card {
-            display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important;
-            margin: 0 0 1rem 0 !important; position: static !important; float: none !important; clear: both !important;
-          }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .estimate-section { flex-direction: column; }
+    }
+  </style>
 </head>
-
 <body>
-    <!-- SVG ICONS -->
-    <svg width="0" height="0" style="position:absolute">
-        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-        </symbol>
-        <symbol id="icon-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </symbol>
-    </svg>
-
-    <div class="adu-wrapper">
-      <!-- Step 1: Location -->
-      <div class="adu-step-container active" id="step1">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 1 of 7 <span class="progress-percent" id="progressPercent1">14%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar1"></div></div>
-            </div>
-            <h1>Your ADU Project Estimate</h1>
-            <p class="subtitle">Start by telling us the location of your project. This helps us tailor the estimate to your local regulations and costs.</p>
-            <form id="adu-form" class="form-container">
-                <div class="form-group full-width">
-                    <label for="address">Street Address</label>
-                    <div id="address-container"></div>
-                    <input type="hidden" id="address" name="address" required />
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="city">City</label>
-                        <input type="text" id="city" name="city" placeholder="e.g., Los Angeles" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="state">State</label>
-                        <select id="state" name="state" required>
-                            <option value="" disabled selected>Select your state</option>
-                            <option value="AL">Alabama</option> <option value="AK">Alaska</option> <option value="AZ">Arizona</option>
-                            <option value="AR">Arkansas</option> <option value="CA">California</option> <option value="CO">Colorado</option>
-                            <option value="CT">Connecticut</option> <option value="DE">Delaware</option> <option value="FL">Florida</option>
-                            <option value="GA">Georgia</option> <option value="HI">Hawaii</option> <option value="ID">Idaho</option>
-                            <option value="IL">Illinois</option> <option value="IN">Indiana</option> <option value="IA">Iowa</option>
-                            <option value="KS">Kansas</option> <option value="KY">Kentucky</option> <option value="LA">Louisiana</option>
-                            <option value="ME">Maine</option> <option value="MD">Maryland</option> <option value="MA">Massachusetts</option>
-                            <option value="MI">Michigan</option> <option value="MN">Minnesota</option> <option value="MS">Mississippi</option>
-                            <option value="MO">Missouri</option> <option value="MT">Montana</option> <option value="NE">Nebraska</option>
-                            <option value="NV">Nevada</option> <option value="NH">New Hampshire</option> <option value="NJ">New Jersey</option>
-                            <option value="NM">New Mexico</option> <option value="NY">New York</option> <option value="NC">North Carolina</option>
-                            <option value="ND">North Dakota</option> <option value="OH">Ohio</option> <option value="OK">Oklahoma</option>
-                            <option value="OR">Oregon</option> <option value="PA">Pennsylvania</option> <option value="RI">Rhode Island</option>
-                            <option value="SC">South Carolina</option> <option value="SD">South Dakota</option> <option value="TN">Tennessee</option>
-                            <option value="TX">Texas</option> <option value="UT">Utah</option> <option value="VT">Vermont</option>
-                            <option value="VA">Virginia</option> <option value="WA">Washington</option> <option value="WV">West Virginia</option>
-                            <option value="WI">Wisconsin</option> <option value="WY">Wyoming</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <div></div>
-                    <button type="button" class="btn btn-continue" onclick="validateAndContinue()">Continue</button>
-                </div>
-            </form>
+  <div class="adu-wrapper">
+    <!-- Step 1 -->
+    <div class="adu-step-container active" id="step1">
+      <div class="adu-main-card">
+        <div class="progress-bar-wrap">
+          <span class="progress-label">Step 1 of 7 <span id="progressPercent1">14%</span></span>
+          <div class="progress-bar"><div class="progress-bar-inner" id="progressBar1"></div></div>
         </div>
+        <h1>Your ADU Project Estimate</h1>
+        <p class="subtitle">Start by telling us the location of your project. This helps us tailor the estimate to your local regulations and costs.</p>
+        <form id="adu-form">
+          <div class="form-group">
+            <label for="address">Street Address</label>
+            <div id="address-container"></div>
+            <input type="hidden" id="address" name="address" required />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" placeholder="e.g., Los Angeles" required>
+            </div>
+            <div class="form-group">
+              <label for="state">State</label>
+              <select id="state" required>
+                <option value="" disabled selected>Select your state</option>
+                <option value="CA">California</option>
+                <option value="MA">Massachusetts</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-container">
+            <button type="button" class="btn btn-continue">Continue</button>
+          </div>
+        </form>
       </div>
+    </div>
+  </div>
 
-      <!-- Step 2: ADU Type -->
-      <div class="adu-step-container" id="step2">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 2 of 7 <span class="progress-percent" id="progressPercent2">28%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar2"></div></div>
-            </div>
-            <h1>What type of ADU are you interested in?</h1>
-            <p class="subtitle">Select the option that best describes your project.</p>
-            <div class="form-container">
-                <div class="options">
-                    <div class="option" onclick="selectOption(this)">
-                        <div class="option-title">Detached ADU</div>
-                        <div class="option-desc">A standalone structure separate from your main home</div>
-                    </div>
-                    <div class="option" onclick="selectOption(this)">
-                        <div class="option-title">Attached ADU</div>
-                        <div class="option-desc">Connected to your existing home</div>
-                    </div>
-                    <div class="option" onclick="selectOption(this)">
-                        <div class="option-title">Garage Conversion</div>
-                        <div class="option-desc">Transform your existing garage into living space</div>
-                    </div>
-                    <div class="option" onclick="selectOption(this)">
-                        <div class="option-title">Basement Conversion</div>
-                        <div class="option-desc">Convert your basement into a separate unit</div>
-                    </div>
-                    <div class="option" onclick="selectOption(this)">
-                        <div class="option-title">Not Sure Yet</div>
-                        <div class="option-desc">I'm exploring my options</div>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button class="btn btn-back" onclick="goBack(1)">Back</button>
-                    <button class="btn btn-continue" onclick="goNext2()">Continue</button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- Step 3: Square Footage -->
-      <div class="adu-step-container" id="step3">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 3 of 7 <span class="progress-percent" id="progressPercent3">43%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar3"></div></div>
-            </div>
-            <h1>What is the size of your ADU?</h1>
-            <p class="subtitle">Select your estimated square footage.</p>
-            <div class="form-container">
-                <div class="choice-grid">
-                    <div class="choice-option" onclick="selectSquareFootage(this, 'Small')">
-                        <div class="checkmark-icon">✓</div>
-                        <svg class="house-icon house-small"><use xlink:href="#icon-house"></use></svg>
-                        <div class="option-title">Small</div>
-                        <div class="option-subtext">Up to 500 sq ft</div>
-                    </div>
-                    <div class="choice-option" onclick="selectSquareFootage(this, 'Medium')">
-                        <div class="checkmark-icon">✓</div>
-                        <svg class="house-icon house-medium"><use xlink:href="#icon-house"></use></svg>
-                        <div class="option-title">Medium</div>
-                        <div class="option-subtext">500–700 sq ft</div>
-                    </div>
-                    <div class="choice-option" onclick="selectSquareFootage(this, 'Large')">
-                        <div class="checkmark-icon">✓</div>
-                        <svg class="house-icon house-large"><use xlink:href="#icon-house"></use></svg>
-                        <div class="option-title">Large</div>
-                        <div class="option-subtext">Over 700 sq ft</div>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button class="btn btn-back" onclick="goBack(2)">Back</button>
-                    <button class="btn btn-continue" id="continueBtn3" disabled onclick="goNext3()">Continue</button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- Step 4: Bedrooms & Bathrooms -->
-      <div class="adu-step-container" id="step4">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 4 of 7 <span class="progress-percent" id="progressPercent4">57%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar4"></div></div>
-            </div>
-            <h1>Bedrooms & Bathrooms</h1>
-            <p class="subtitle">How many bedrooms and bathrooms will your ADU have?</p>
-            <div class="form-container">
-                <div class="section-heading">Bedrooms</div>
-                <div class="choice-grid">
-                    <div class="choice-option" onclick="selectBedrooms(this, 'Studio')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">Studio</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBedrooms(this, '1 Bedroom')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">1 Bedroom</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBedrooms(this, '2 Bedrooms')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">2 Bedrooms</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBedrooms(this, '3+ Bedrooms')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">3+ Bedrooms</div>
-                    </div>
-                </div>
-
-                <div class="section-heading">Bathrooms</div>
-                <div class="choice-grid">
-                    <div class="choice-option" onclick="selectBathrooms(this, '1 Bath')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">1 Bath</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBathrooms(this, '1.5 Baths')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">1.5 Baths</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBathrooms(this, '2 Baths')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">2 Baths</div>
-                    </div>
-                    <div class="choice-option" onclick="selectBathrooms(this, '2+ Baths')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">2+ Baths</div>
-                    </div>
-                </div>
-
-                <div class="button-container">
-                    <button class="btn btn-back" onclick="goBack(3)">Back</button>
-                    <button class="btn btn-continue" id="continueBtn4" disabled onclick="goNext4()">Continue</button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- Step 5: Timeline -->
-      <div class="adu-step-container" id="step5">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 5 of 7 <span class="progress-percent" id="progressPercent5">71%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar5"></div></div>
-            </div>
-            <h1>What's your timeline?</h1>
-            <p class="subtitle">When are you looking to start your ADU project?</p>
-            <div class="form-container">
-                <div class="choice-grid">
-                    <div class="choice-option" onclick="selectTimeline(this, 'As soon as possible')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">As soon as possible</div>
-                        <div class="option-subtext">Ready to begin immediately</div>
-                    </div>
-                    <div class="choice-option" onclick="selectTimeline(this, '1-3 months')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">1–3 months</div>
-                        <div class="option-subtext">Planning to start this quarter</div>
-                    </div>
-                    <div class="choice-option" onclick="selectTimeline(this, '3-6 months')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">3–6 months</div>
-                        <div class="option-subtext">Planning ahead for later this year</div>
-                    </div>
-                    <div class="choice-option" onclick="selectTimeline(this, '6+ months')">
-                        <div class="checkmark-icon">✓</div>
-                        <div class="option-title">6+ months</div>
-                        <div class="option-subtext">Just researching for future plans</div>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button class="btn btn-back" onclick="goBack(4)">Back</button>
-                    <button class="btn btn-continue" id="continueBtn5" disabled onclick="goNext5()">Continue</button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- Step 6: Contact Info -->
-      <div class="adu-step-container" id="step6">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 6 of 7 <span class="progress-percent" id="progressPercent6">86%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar6"></div></div>
-            </div>
-            <h1>Last Step!</h1>
-            <p class="subtitle">Enter your contact information to get your personalized estimate.</p>
-            <form id="contact-form" class="form-container">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="firstName">First Name *</label>
-                        <input type="text" id="firstName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name *</label>
-                        <input type="text" id="lastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone *</label>
-                        <input type="tel" id="phone" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="notes">Additional Information</label>
-                        <textarea id="notes" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button type="button" class="btn btn-back" onclick="goBack(5)">Back</button>
-                    <button type="submit" class="btn btn-continue" id="submit-button">Get My Estimate</button>
-                </div>
-            </form>
-        </div>
-      </div>
-
-      <!-- Step 7: Results -->
-      <div class="adu-step-container" id="step7">
-        <div class="adu-main-card">
-            <div class="progress-bar-wrap">
-                <span class="progress-label">Step 7 of 7 <span class="progress-percent" id="progressPercent7">100%</span></span>
-                <div class="progress-bar"><div class="progress-bar-inner" id="progressBar7"></div></div>
-            </div>
-            <h1 style="color: var(--accent-color);">Your Estimate is Ready!</h1>
-            <p class="subtitle">We've analyzed your project requirements and prepared a personalized estimate.</p>
-            <div class="estimate-section">
-                <div class="card">
-                    <h3>Architectural Planning & Engineering</h3>
-                    <div class="cost-item">
-                        <div class="cost-label">Fixed Cost:</div>
-                        <div class="cost-value" id="fixedCost">$0</div>
-                    </div>
-                    <div class="payment-plan">Payment plans available.</div>
-                    <p class="reimbursement-note">
-                        Fully reimbursed by the Boston ADU Financial Assistance program.
-                    </p>
-                    <ul class="services-list">
-                        <li>✓ Preliminary Design Consultation</li>
-                        <li>✓ Architectural Drawing & Plans</li>
-                        <li>✓ Structural Engineering</li>
-                        <li>✓ Permit Application Assistance</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Construction Cost Estimate</h3>
-                    <div class="cost-item">
-                        <div class="cost-label">General Contractor:</div>
-                        <div class="cost-range">$<span id="gcLow">0</span> - $<span id="gcHigh">0</span> / sqft</div>
-                    </div>
-                    <div class="cost-item" style="margin-bottom: 2rem;">
-                        <div class="cost-label" style="font-size: 1.01rem; color: #ea2039; font-weight: bold;">
-                            Monthly Payment with Boston ADU Financial Assistance Program
-                        </div>
-                        <div class="cost-value" id="monthlyLoanPaymentBoston" style="font-size: 1.23rem; color: #ea2039; font-weight: bold;">
-                            $0
-                        </div>
-                    </div>
-                    <div class="cost-item">
-                        <div class="cost-label" style="font-size: 0.85rem; color: #1d3557;">
-                            Regular Monthly Payment (8% APR, 30 years)
-                        </div>
-                        <div class="cost-value" id="monthlyLoanPayment" style="font-size: 1rem; color: #114e80;">
-                            $0
-                        </div>
-                    </div>
-                    <div class="cost-item">
-                        <div class="cost-label" style="font-size: 0.85rem; color: #1d3557;">
-                            Total Construction Price
-                        </div>
-                        <div class="cost-value" id="constructionTotal" style="font-size: 1rem; color: #114e80;">
-                            $0
-                        </div>
-                    </div>
-                    <p class="note" style="font-size: 0.75rem; margin-top: auto;">Note: This is a preliminary estimate. Final costs may vary based on site conditions, material selections, and contractor bids.</p>
-                </div>
-            </div>
-            <div class="cta-section">
-                <h2>Ready for a Free Consultation?</h2>
-                <p>Book a free call to discuss your project in detail with our experts.</p>
-                <a href="#" class="btn btn-consult">Book a Free Consult</a>
-            </div>
-            <div class="cta-section">
-                <h2>Need a Detailed Feasibility Report?</h2>
-                <p>Get a comprehensive analysis of your property's ADU potential.</p>
-                <a href="#" class="btn btn-feasibility">Get Feasibility Report</a>
-            </div>
-        </div>
-      </div>
-    </div><!-- /.adu-wrapper -->
-
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
-    <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoidWFkdSIsImEiOiJjbWRveG44YTcwNnN3MmxuN25kdTVleTFpIn0.hP0aOMGxamVOg-ecgookaw';
-        const geocoder = new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            types: 'address',
-            countries: 'us',
-            placeholder: 'Start typing address...',
-            getItemValue: (item) => item.address ? `${item.address} ${item.text}` : item.text,
-            mapboxgl: mapboxgl
-        });
-        geocoder.addTo('#address-container');
-        geocoder.on('result', event => {
-            const place = event.result;
-            document.getElementById('address').value = place.address ? `${place.address} ${place.text}` : place.text;
-            const context = place.context || [];
-            const city = context.find(c => c.id.startsWith('place'));
-            const region = context.find(c => c.id.startsWith('region'));
-            if (city) document.getElementById('city').value = city.text;
-            if (region) {
-                const stateCode = region.short_code?.split('-')[1]?.toUpperCase();
-                document.getElementById('state').value = stateCode || '';
-            }
-        });
-        geocoder.on('clear', () => {
-            document.getElementById('address').value = '';
-            document.getElementById('city').value = '';
-            document.getElementById('state').value = '';
-        });
-    </script>
-
-    <script>
-        // ==== CONFIG (UI + math use this) ====
-        const SIZE_CONFIG = {
-          Small:  { label: "Up to 500 sq ft",   calcSqft: 400 },
-          Medium: { label: "500–700 sq ft",     calcSqft: 600 },
-          Large:  { label: "Over 700 sq ft",    calcSqft: 800 },
-        };
-
-        // GC $/sqft ranges by ADU type
-        const GC_RANGE_CONFIG = {
-          "Detached ADU":        [350, 420],
-          "Attached ADU":        [350, 420],
-          "Not Sure Yet":        [350, 420],
-          "Garage Conversion":   [290, 330],
-          "Basement Conversion": [290, 330],
-        };
-
-        // Progress bar logic for 7 steps
-        const progressData = [
-            { percent: 14, id: 1 }, { percent: 28, id: 2 }, { percent: 43, id: 3 },
-            { percent: 57, id: 4 }, { percent: 71, id: 5 }, { percent: 86, id: 6 }, { percent: 100, id: 7 }
-        ];
-
-        // Initialize selections
-        let selectedSquareFootage = null;
-        let selectedBedrooms = null;
-        let selectedBathrooms = null;
-        let selectedTimeline = null;
-
-        function updateProgress(step) {
-            for (let i = 1; i <= 7; i++) {
-                document.getElementById(`progressBar${i}`).style.width = progressData[i-1].percent + '%';
-                document.getElementById(`progressPercent${i}`).textContent = progressData[i-1].percent + '%';
-            }
-        }
-
-        let currentStep = 1;
-        function showStep(step) {
-            document.querySelectorAll('.adu-step-container').forEach((el) => el.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-            currentStep = step;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            updateProgress(step);
-            if (step === 7) fillEstimate();
-        }
-
-        // Sync Step 3 labels to SIZE_CONFIG
-        function applySizeLabelsFromConfig() {
-          const map = {
-            Small:  document.querySelector('#step3 .choice-grid .choice-option:nth-child(1) .option-subtext'),
-            Medium: document.querySelector('#step3 .choice-grid .choice-option:nth-child(2) .option-subtext'),
-            Large:  document.querySelector('#step3 .choice-grid .choice-option:nth-child(3) .option-subtext'),
-          };
-          for (const key of Object.keys(SIZE_CONFIG)) {
-            if (map[key]) map[key].textContent = SIZE_CONFIG[key].label;
-          }
-        }
-
-        // Step 1 validation
-        function validateAndContinue() {
-            const form = document.getElementById('adu-form');
-            const inputs = form.querySelectorAll('input[required], select[required]');
-            let isValid = true;
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    input.classList.add('error');
-                } else {
-                    input.classList.remove('error');
-                }
-            });
-            if (isValid) {
-                const formData = {
-                    address: document.getElementById('address').value,
-                    city: document.getElementById('city').value,
-                    state: document.getElementById('state').value,
-                };
-                sessionStorage.setItem('aduProjectData_step1', JSON.stringify(formData));
-                showStep(2);
-            }
-        }
-
-        // Step 2 selection
-        let selectedValueStep2 = null;
-        function selectOption(el) {
-            document.querySelectorAll('#step2 .option').forEach(opt => opt.classList.remove('active'));
-            el.classList.add('active');
-            selectedValueStep2 = el.querySelector('.option-title').innerText;
-        }
-        function goBack(step) { showStep(step); }
-        function goNext2() {
-            if (!selectedValueStep2) { alert('Please select an ADU type.'); return; }
-            sessionStorage.setItem('adu_type', JSON.stringify(selectedValueStep2));
-            showStep(3);
-        }
-
-        // Step 3 square footage selection
-        function selectSquareFootage(el, value) {
-            document.querySelectorAll('#step3 .choice-option').forEach(opt => opt.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedSquareFootage = value;
-            document.getElementById('continueBtn3').disabled = false;
-        }
-        function goNext3() {
-            if (!selectedSquareFootage) { alert('Please select a square footage.'); return; }
-            sessionStorage.setItem('aduSquareFootage', JSON.stringify(selectedSquareFootage));
-            showStep(4);
-        }
-
-        // Step 4 bed/bath selection
-        function selectBedrooms(el, value) {
-            document.querySelectorAll('#step4 .choice-option').forEach(opt => {
-                if (opt.querySelector('.option-title').innerText.includes('Studio') ||
-                    opt.querySelector('.option-title').innerText.includes('Bedroom')) {
-                    opt.classList.remove('selected');
-                }
-            });
-            el.classList.add('selected');
-            selectedBedrooms = value;
-            checkStep4Completion();
-        }
-        function selectBathrooms(el, value) {
-            document.querySelectorAll('#step4 .choice-option').forEach(opt => {
-                if (opt.querySelector('.option-title').innerText.includes('Bath')) {
-                    opt.classList.remove('selected');
-                }
-            });
-            el.classList.add('selected');
-            selectedBathrooms = value;
-            checkStep4Completion();
-        }
-        function checkStep4Completion() {
-            document.getElementById('continueBtn4').disabled = !(selectedBedrooms && selectedBathrooms);
-        }
-        function goNext4() {
-            if (!(selectedBedrooms && selectedBathrooms)) { alert('Please select both bedrooms and bathrooms.'); return; }
-            const selections = { bedrooms: selectedBedrooms, bathrooms: selectedBathrooms };
-            sessionStorage.setItem('aduBedBath', JSON.stringify(selections));
-            showStep(5);
-        }
-
-        // Step 5 timeline
-        function selectTimeline(el, value) {
-            document.querySelectorAll('#step5 .choice-option').forEach(opt => opt.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedTimeline = value;
-            document.getElementById('continueBtn5').disabled = false;
-        }
-        function goNext5() {
-            if (!selectedTimeline) return;
-            sessionStorage.setItem('aduTimeline', JSON.stringify(selectedTimeline));
-            showStep(6);
-        }
-
-        // Step 6 Contact Submission
-        const contactForm = document.getElementById('contact-form');
-        const submitButton = document.getElementById('submit-button');
-        const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbzCtYecRtp214NcAysqEGLNIcgdpJ-8jScFPp5qEnsZVSFI1kC1gd3aXne0mrPPFGYZ/exec';
-        if (contactForm) {
-            contactForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                submitButton.disabled = true;
-                submitButton.textContent = 'Submitting...';
-                const step1Data = JSON.parse(sessionStorage.getItem('aduProjectData_step1')) || {};
-                const aduType = JSON.parse(sessionStorage.getItem('adu_type')) || 'N/A';
-                const aduSquareFootage = JSON.parse(sessionStorage.getItem('aduSquareFootage')) || 'N/A';
-                const aduBedBath = JSON.parse(sessionStorage.getItem('aduBedBath')) || {};
-                const aduTimeline = JSON.parse(sessionStorage.getItem('aduTimeline')) || 'N/A';
-                const payload = {
-                    timestamp: new Date().toLocaleString(),
-                    firstName: document.getElementById("firstName").value,
-                    lastName: document.getElementById("lastName").value,
-                    email: document.getElementById("email").value,
-                    phone: document.getElementById("phone").value,
-                    address: step1Data.address || 'N/A',
-                    city: step1Data.city || 'N/A',
-                    state: step1Data.state || 'N/A',
-                    notes: document.getElementById("notes").value,
-                    aduType: aduType,
-                    squareFootage: aduSquareFootage,
-                    bedrooms: aduBedBath.bedrooms || 'N/A',
-                    bathrooms: aduBedBath.bathrooms || 'N/A',
-                    timeline: aduTimeline
-                };
-                fetch(googleScriptUrl, { method: 'POST', body: JSON.stringify(payload), mode: 'no-cors' })
-                .then(() => { showStep(7); })
-                .catch(() => {
-                    alert('An error occurred while submitting your estimate. Please try again.');
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Get My Estimate';
-                });
-            });
-        }
-
-        // Step 7 estimate calculation
-        function fillEstimate() {
-          const aduType = JSON.parse(sessionStorage.getItem('adu_type'));
-          const fixedCost = (aduType === "Basement Conversion") ? 10000 : 7500;
-          document.getElementById("fixedCost").textContent = `$${fixedCost.toLocaleString()}`;
-          // (Removed 5-payment calc as requested)
-
-          // Size from config (keeps UI + math in sync)
-          const aduSquareFootage = JSON.parse(sessionStorage.getItem('aduSquareFootage'));
-          const size = (SIZE_CONFIG[aduSquareFootage]?.calcSqft) ?? SIZE_CONFIG.Small.calcSqft;
-
-          // GC range from type
-          const gcRange = GC_RANGE_CONFIG[aduType] ?? GC_RANGE_CONFIG["Not Sure Yet"];
-          const gcMid = Math.round((gcRange[0] + gcRange[1]) / 2);
-          const constructionPrice = size * gcMid;
-
-          // Display (add commas to per-sqft numbers; $ is in HTML)
-          document.getElementById("gcLow").textContent = gcRange[0].toLocaleString();
-          document.getElementById("gcHigh").textContent = gcRange[1].toLocaleString();
-          document.getElementById("constructionTotal").textContent = `$${constructionPrice.toLocaleString()}`;
-
-          // Loans
-          const loanAmount = constructionPrice;
-          const bostonLoanAmount = Math.max(loanAmount - 57500, 0);
-          const annualRate = 0.08;
-          const monthlyRate = annualRate / 12;
-          const months = 30 * 12;
-
-          function mortgage(P, r, n) {
-            return P * r / (1 - Math.pow(1 + r, -n));
-          }
-          const monthlyPayment = mortgage(loanAmount, monthlyRate, months);
-          const bostonMonthlyPayment = mortgage(bostonLoanAmount, monthlyRate, months);
-
-          document.getElementById("monthlyLoanPayment").textContent =
-            `$${monthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-          document.getElementById("monthlyLoanPaymentBoston").textContent =
-            `$${bostonMonthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            applySizeLabelsFromConfig();   // NEW: sync Step 3 labels to config
-            showStep(1);
-            updateProgress(1);
-        });
-    </script>
+  <!-- Mapbox -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoidWFkdSIsImEiOiJjbWRveG44YTcwNnN3MmxuN25kdTVleTFpIn0.hP0aOMGxamVOg-ecgookaw';
+    const geocoder = new MapboxGeocoder({ accessToken: mapboxgl.accessToken, types: 'address', countries: 'us' });
+    geocoder.addTo('#address-container');
+  </script>
 </body>
 </html>
